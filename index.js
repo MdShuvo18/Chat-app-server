@@ -9,7 +9,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
 
 // imported file
-const User = require('./Models/Users')
+const User = require('./Models/Users');
+const Conversation = require('./Models/Conversation');
 
 console.log('User Model:', User);
 
@@ -86,6 +87,19 @@ app.post('/api/login', async (req, res) => {
     }
     catch {
         res.status(500).json({ message: 'Server error' });
+    }
+})
+
+// post api for conversation
+app.post('/api/conversation', async (req, res) => {
+    try {
+        const { senderId, receiverId } = req.body
+        const newConversation = new Conversation({ members: [senderId, receiverId] })
+        await newConversation.save()
+        res.status(201).json({ message: "New Conversation created successfuly" })
+    }
+    catch {
+        res.status(500).json({ message: 'Server error' })
     }
 })
 
