@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended: false }))
 // imported file
 const User = require('./Models/Users');
 const Conversation = require('./Models/Conversation');
+const Messages = require('./Models/Messages');
 
 console.log('User Model:', User);
 
@@ -108,19 +109,34 @@ app.get('/api/conversation/:userId', async (req, res) => {
     try {
         const userId = req.params.userId
         const conversations = await Conversation.find({ members: { $in: [userId] } })
-        const conversationUsersData= Promise.all(conversations.map(async(conversation)=>{
-            const otherUserId = conversation.members.find(member => member!== userId)
+        const conversationUsersData = Promise.all(conversations.map(async (conversation) => {
+            const otherUserId = conversation.members.find(member => member !== userId)
             const otherUser = await User.findById(otherUserId)
             return {
-                _id: conversation._id,
+                conversationId: conversation._id,
                 userId: otherUserId,
-                userName: otherUser.fullName
+                userName: otherUser.fullName,
+                email: otherUser.email
+
             }
 
         }))
-        res.status(200).json(await conversationUsersData) 
+        res.status(200).json(await conversationUsersData)
     }
-    catch{}
+    catch { }
+})
+
+// post api for messages
+app.post('/api/messages', async (req, res) => {
+    try {
+        const { conversationId, senderId, message } = req.body
+        const newMessage = new Messages({ conversationId, senderId, message })
+        await newMessage.save()
+        res.status(201).json({ message: "New Message created successfuly" })
+    }
+    catch {
+        res.status(500).json({ message: 'Server error' })
+    }
 })
 
 app.get('/', (req, res) => {
