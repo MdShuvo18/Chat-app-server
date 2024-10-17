@@ -1,12 +1,15 @@
 const express = require('express');
 const bcryptjs = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 const app = express();
+
 const port = 5000
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
+app.use(cors())
 
 // imported file
 const User = require('./Models/Users');
