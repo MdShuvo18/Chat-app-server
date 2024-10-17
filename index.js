@@ -139,6 +139,30 @@ app.post('/api/messages', async (req, res) => {
     }
 })
 
+// get api for messages
+app.get('/api/messages/:conversationId', async (req, res) => {
+    try {
+        const conversationId = req.params.conversationId
+        const messages = await Messages.find({ conversationId: conversationId }).sort({ createdAt: 'asc' })
+        res.status(200).json(messages)
+    }
+    catch {
+        res.status(500).json({ message: 'Server error' })
+    }
+})
+
+
+// get api for all users
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await User.find({})
+        res.status(200).json(users);
+    }
+    catch {
+        res.status(500).json({ message: 'Server error' })
+    }
+})
+
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
