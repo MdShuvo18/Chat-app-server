@@ -103,6 +103,26 @@ app.post('/api/conversation', async (req, res) => {
     }
 })
 
+// get api for conversation id
+app.get('/api/conversation/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId
+        const conversations = await Conversation.find({ members: { $in: [userId] } })
+        const conversationUsersData= Promise.all(conversations.map(async(conversation)=>{
+            const otherUserId = conversation.members.find(member => member!== userId)
+            const otherUser = await User.findById(otherUserId)
+            return {
+                _id: conversation._id,
+                userId: otherUserId,
+                userName: otherUser.fullName
+            }
+
+        }))
+        res.status(200).json(await conversationUsersData) 
+    }
+    catch{}
+})
+
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
