@@ -81,7 +81,7 @@ app.post('/api/login', async (req, res) => {
                     const JWT_SECRET_KEY = "your-secret-key"
                     // Generate token
                     const token = jwt.sign({ id: user._id }, JWT_SECRET_KEY, { expiresIn: '1h' });
-                    res.json({ user: { email: user.email, name: user.fullName }, token });
+                    res.json({ user: {id:user._id ,email: user.email, name: user.fullName }, token });
 
                 });
 
@@ -145,14 +145,16 @@ app.post('/api/messages', async (req, res) => {
 // get api for messages
 app.get('/api/messages/:conversationId', async (req, res) => {
     try {
-        const conversationId = req.params.conversationId
-        const messages = await Messages.find({ conversationId: conversationId }).sort({ createdAt: 'asc' })
-        res.status(200).json(messages)
+        const conversationId = req.params.conversationId;
+        console.log(conversationId);
+        const messages = await Messages.find({ conversationId }).sort({ createdAt: 'asc' });
+        // console.log(messages);
+        res.status(200).json(messages);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
     }
-    catch {
-        res.status(500).json({ message: 'Server error' })
-    }
-})
+});
+
 
 
 // get api for all users
