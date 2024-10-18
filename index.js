@@ -15,6 +15,8 @@ app.use(cors())
 const User = require('./Models/Users');
 const Conversation = require('./Models/Conversation');
 const Messages = require('./Models/Messages');
+const { default: mongoose } = require('mongoose');
+const Users = require('./Models/Users');
 
 console.log('User Model:', User);
 
@@ -81,7 +83,7 @@ app.post('/api/login', async (req, res) => {
                     const JWT_SECRET_KEY = "your-secret-key"
                     // Generate token
                     const token = jwt.sign({ id: user._id }, JWT_SECRET_KEY, { expiresIn: '1h' });
-                    res.json({ user: {id:user._id ,email: user.email, name: user.fullName }, token });
+                    res.json({ user: { id: user._id, email: user.email, name: user.fullName }, token });
 
                 });
 
@@ -92,7 +94,7 @@ app.post('/api/login', async (req, res) => {
     catch {
         res.status(500).json({ message: 'Server error' });
     }
-})
+});
 
 // post api for conversation
 app.post('/api/conversation', async (req, res) => {
@@ -105,7 +107,7 @@ app.post('/api/conversation', async (req, res) => {
     catch {
         res.status(500).json({ message: 'Server error' })
     }
-})
+});
 
 // get api for conversation id
 app.get('/api/conversation/:userId', async (req, res) => {
@@ -127,7 +129,7 @@ app.get('/api/conversation/:userId', async (req, res) => {
         res.status(200).json(await conversationUsersData)
     }
     catch { }
-})
+});
 
 // post api for messages
 app.post('/api/messages', async (req, res) => {
@@ -140,18 +142,37 @@ app.post('/api/messages', async (req, res) => {
     catch {
         res.status(500).json({ message: 'Server error' })
     }
-})
+});
 
 // get api for messages
 app.get('/api/messages/:conversationId', async (req, res) => {
     try {
         const conversationId = req.params.conversationId;
-        console.log(conversationId);
-        const messages = await Messages.find({ conversationId }).sort({ createdAt: 'asc' });
-        // console.log(messages);
-        res.status(200).json(messages);
+        if (conversationId == 'new') {
+            return res.status(200).json([])
+        }
+        const messages = await Messages.find({ conversationId: conversationId });
+        const messageUserData = Promise.all(messages.map(async (message) => {
+            const user = await Users.findById(message.senderId);
+            return { message: message.message }
+        }))
+        res.status(200).json(await messageUserData)
+        // console.log("Received conversationId:", conversationId);
+
+        // // Fetch messages based on the ObjectId or String
+        // const messages = await Messages.find({
+        //     conversationId: new mongoose.Types.ObjectId(conversationId)
+        // }).sort({ createdAt: 'asc' });
+        // console.log(messages)
+
+        // // Return the messages if found
+        // res.status(200).json([{messages: messages}]);
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        // Log the full error to the console for debugging
+        console.error("Detailed error stack:", error.stack);  // This gives the full error message and stack trace
+
+        // Return a more informative error message
+        res.status(500).json({ message: error.message || 'Internal server error' });
     }
 });
 
@@ -166,12 +187,12 @@ app.get('/api/users', async (req, res) => {
     catch {
         res.status(500).json({ message: 'Server error' })
     }
-})
+});
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
-})
+});
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
-})
+});
