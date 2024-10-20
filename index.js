@@ -15,7 +15,7 @@ app.use(cors())
 const User = require('./Models/Users');
 const Conversation = require('./Models/Conversation');
 const Messages = require('./Models/Messages');
-const { default: mongoose } = require('mongoose');
+const  mongoose  = require('mongoose');
 const Users = require('./Models/Users');
 
 console.log('User Model:', User);
@@ -23,8 +23,8 @@ console.log('User Model:', User);
 // database connection 
 require('./Connectdb/connectdb')
 
-// routes
 
+// routes
 // post api for register
 app.post('/api/register', async (req, res) => {
     try {
@@ -182,6 +182,7 @@ app.get('/api/messages/:conversationId', async (req, res) => {
 app.get('/api/users', async (req, res) => {
     try {
         const users = await User.find({})
+        console.log(users)
         res.status(200).json(users);
     }
     catch {
