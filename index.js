@@ -9,7 +9,10 @@ const port = 5000
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }))
-app.use(cors())
+app.use(cors({
+    origin: '*', // Allow all origins
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow only these methods
+  }));
 
 // imported file
 const User = require('./Models/Users');
